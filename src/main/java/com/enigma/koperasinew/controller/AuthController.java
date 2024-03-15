@@ -8,11 +8,9 @@ import com.enigma.koperasinew.dto.response.LoginResponse;
 import com.enigma.koperasinew.dto.response.RegisterResponse;
 import com.enigma.koperasinew.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = AppPath.URL_CROSS)
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(AppPath.AUTH)

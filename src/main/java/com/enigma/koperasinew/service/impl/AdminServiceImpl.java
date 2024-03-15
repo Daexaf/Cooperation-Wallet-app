@@ -72,16 +72,16 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminResponse update(AdminRequest adminRequest) {
-        Query findCustomerQuery = entityManager.createNativeQuery(
-                        "SELECT * FROM m_admin WHERE id = ?", Customer.class)
+        Query findAdminQuery = entityManager.createNativeQuery(
+                        "SELECT * FROM m_admin WHERE id = ?", Admin.class)
                 .setParameter(1, adminRequest.getId());
 
-        List<Admin> resultList = findCustomerQuery.getResultList();
+        List<Admin> resultList = findAdminQuery.getResultList();
         if (!resultList.isEmpty()) {
             Admin existingAdmin = resultList.get(0);
 
             Query updateQuery = entityManager.createNativeQuery(
-                            "UPDATE m_customer SET full_name = ?, mobile_phone = ?, email = ? WHERE id = ?")
+                            "UPDATE m_admin SET full_name = ?, mobile_phone = ?, email = ? WHERE id = ?")
                     .setParameter(1, adminRequest.getName())
                     .setParameter(2, adminRequest.getMobilePhone())
                     .setParameter(3, adminRequest.getEmail())
@@ -98,6 +98,7 @@ public class AdminServiceImpl implements AdminService {
             return null;
         }
     }
+
 
     @Override
     public void delete(String id) {

@@ -11,7 +11,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,23 +28,27 @@ public class SavingServiceImpl implements SavingService {
     @Override
     public List<SavingResponse> getAllSavings() {
         List<Object[]> resultList = entityManager.createNativeQuery(
-                        "SELECT id, customer_id, e_type, date, amount FROM m_saving")
+                        "SELECT id, name, customer_id, e_type, date, amount, interest FROM m_saving")
                 .getResultList();
 
         return resultList.stream()
                 .map(row -> {
                     String id = (String) row[0];
-                    String customerId = (String) row[1];
-                    EType eType = EType.valueOf((String) row[2]);
-                    LocalDateTime date = ((Timestamp) row[3]).toLocalDateTime();
-                    Double amount = (Double) row[4];
+                    String name = (String) row[1];
+                    String customerId = (String) row[2];
+                    EType eType = EType.valueOf((String) row[3]);
+                    LocalDateTime date = ((Timestamp) row[4]).toLocalDateTime();
+                    Double amount = (Double) row[5];
+                    Double interest = (Double) row[6];
 
                     return SavingResponse.builder()
                             .id(id)
+                            .name(name)
                             .customer(customerId)
                             .eType(eType)
                             .date(date)
                             .amount(amount)
+                            .interest(interest)
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -108,12 +111,22 @@ public class SavingServiceImpl implements SavingService {
                 .getSingleResult();
 
         if (result != null) {
+            String savingId = (String) result[0];
+            String name = (String) result[1];
+            String customerId = (String) result[2];
+            EType eType = EType.valueOf((String) result[3]);
+            LocalDateTime date = ((Timestamp) result[4]).toLocalDateTime();
+            Double amount = (Double) result[5];
+            Double interest = (Double) result[6];
+
             return SavingResponse.builder()
-                    .id((String) result[0])
-                    .customer((String) result[1])
-                    .eType(EType.valueOf((String) result[2]))
-                    .date((LocalDateTime) result[3])
-                    .amount((Double) result[4])
+                    .id(savingId)
+                    .name(name)
+                    .customer(customerId)
+                    .eType(eType)
+                    .date(date)
+                    .amount(amount)
+                    .interest(interest)
                     .build();
         }
         return null;
@@ -135,7 +148,7 @@ public class SavingServiceImpl implements SavingService {
     }
 
     @Override
-    public SavingResponse addAmount(String id, double addAmount) {
+    public SavingResponse deposit(String id, double addAmount) {
         Saving existingSaving = entityManager.find(Saving.class, id);
         if (existingSaving == null) {
             throw new IllegalArgumentException("Saving with ID " + id + " not found");
@@ -180,4 +193,33 @@ public class SavingServiceImpl implements SavingService {
         entityManager.merge(existingSaving);
         return convertToResponse(existingSaving);
     }
+
+    @Override
+    public SavingResponse getSavingByIdCust(String customerId) {
+        List<Object[]> resultList = entityManager.createNativeQuery(
+                        "SELECT id, customer_id, e_type, date, amount, interest FROM m_saving WHERE customer_id = :customerId")
+                .setParameter("customerId", customerId)
+                .getResultList();
+
+        if (!resultList.isEmpty()) {
+            Object[] row = resultList.get(0);
+            String id = (String) row[0];
+            String customer = (String) row[1];
+            EType eType = EType.valueOf((String) row[2]);
+            LocalDateTime date = ((Timestamp) row[3]).toLocalDateTime();
+            Double amount = (Double) row[4];
+            Double interest = (Double) row[5];
+
+            return SavingResponse.builder()
+                    .id(id)
+                    .customer(customer)
+                    .eType(eType)
+                    .date(date)
+                    .amount(amount)
+                    .interest(interest)
+                    .build();
+        }
+        return null;
+    }
+
 }

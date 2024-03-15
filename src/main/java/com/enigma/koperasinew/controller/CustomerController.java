@@ -7,10 +7,12 @@ import com.enigma.koperasinew.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = AppPath.URL_CROSS)
 @RestController
 @RequestMapping(AppPath.CUSTOMER)
 @RequiredArgsConstructor
@@ -28,10 +30,10 @@ public class CustomerController {
                         .build());
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/v1")
     public ResponseEntity<?> getAllCustomer() {
         List<CustomerResponse> customerList = customerService.getAllCustomers();
-
         return ResponseEntity.ok(
                 CommonResponse.<List<CustomerResponse>>builder()
                         .statusCode(HttpStatus.OK.value())
@@ -40,10 +42,10 @@ public class CustomerController {
                         .build());
     }
 
+    @PreAuthorize("hasRole('ROLE_CUSTOMER')")
     @GetMapping("/v1/{id}")
     public ResponseEntity<?> getCustomerById(@PathVariable String id) {
         CustomerResponse customerResponse = customerService.getCustomerById(id);
-
         return ResponseEntity.status(HttpStatus.OK)
                 .body(CommonResponse.<CustomerResponse>builder()
                         .statusCode(HttpStatus.OK.value())
@@ -52,6 +54,7 @@ public class CustomerController {
                         .build());
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/v1/{id}")
     public ResponseEntity<?> deleteCustomerById(@PathVariable String id) {
         customerService.delete(id);
@@ -62,5 +65,17 @@ public class CustomerController {
                         .message("Successfully Delete Customer")
                         .data(HttpStatus.OK)
                         .build());
+    }
+
+    @PreAuthorize("hasRole('ROLE_CUSTOMER')")
+    @PutMapping("/v1/{id}")
+    public ResponseEntity<CustomerResponse> updateCust(@PathVariable String id, @RequestBody CustomerRequest customerRequest) {
+        customerRequest.setId(id);
+        CustomerResponse updatedCust = customerService.updateCustomer(customerRequest);
+        if (updatedCust != null) {
+            return ResponseEntity.ok(updatedCust);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

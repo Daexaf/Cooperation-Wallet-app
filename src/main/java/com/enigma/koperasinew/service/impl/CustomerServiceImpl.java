@@ -103,24 +103,18 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerResponse updateCustomer(CustomerRequest customerRequest) {
-        Query findCustomerQuery = entityManager.createNativeQuery(
-                        "SELECT * FROM m_customer WHERE id = ?", Customer.class)
-                .setParameter(1, customerRequest.getId());
+        Query updateQuery = entityManager.createNativeQuery(
+                        "UPDATE m_customer SET full_name = ?, mobile_phone = ?, email = ?, address = ?, customer_identity = ? WHERE id = ?")
+                .setParameter(1, customerRequest.getName())
+                .setParameter(2, customerRequest.getMobilePhone())
+                .setParameter(3, customerRequest.getEmail())
+                .setParameter(4, customerRequest.getAddress())
+                .setParameter(5, customerRequest.getCustomerIdentity())
+                .setParameter(6, customerRequest.getId());
 
-        List<Customer> resultList = findCustomerQuery.getResultList();
-        if (!resultList.isEmpty()) {
-            Customer existingCustomer = resultList.get(0);
+        int updatedRows = updateQuery.executeUpdate();
 
-            Query updateQuery = entityManager.createNativeQuery(
-                            "UPDATE m_customer SET full_name = ?, mobile_phone = ?, email = ?, address = ?, customer_identity = ? WHERE id = ?")
-                    .setParameter(1, customerRequest.getName())
-                    .setParameter(2, customerRequest.getMobilePhone())
-                    .setParameter(3, customerRequest.getEmail())
-                    .setParameter(4, customerRequest.getAddress())
-                    .setParameter(5, customerRequest.getCustomerIdentity())
-                    .setParameter(6, customerRequest.getId());
-            updateQuery.executeUpdate();
-
+        if (updatedRows > 0) {
             return CustomerResponse.builder()
                     .id(customerRequest.getId())
                     .name(customerRequest.getName())
@@ -133,6 +127,7 @@ public class CustomerServiceImpl implements CustomerService {
             return null;
         }
     }
+
 
     @Override
     public CustomerResponse createNewCustomer(Customer customerRequest) {
