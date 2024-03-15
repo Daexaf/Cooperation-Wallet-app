@@ -13,7 +13,7 @@ The Cooperative Savings and Loans Application is a system that allows its member
 
 - Java
 - Spring Framework (Spring Boot, Spring Data JPA)
-- MySQL
+- PostgreSQL
 - Maven
 
 ## Running the Application
@@ -23,7 +23,8 @@ The Cooperative Savings and Loans Application is a system that allows its member
 3. Create a PostgreSQL database named `cooperative`.
 4. Configure the database connection in the `application.properties` file.
 5. Run the application using Maven:
-6. The application will run at `http://localhost:8080`.
+6. The application will run at `http://localhost:8099`.
 
-#Documentation
+## Documentation
 Documentation with Postman API: https://documenter.getpostman.com/view/31046843/2sA2xmWBVB
+Github Link: https://github.com/Daexaf/Cooperation-Wallet-app
