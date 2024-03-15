@@ -21,6 +21,9 @@ public class Saving {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(name="name" ,nullable = false)
+    private String name;
+
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
@@ -33,5 +36,8 @@ public class Saving {
 
     @Column(name = "amount", nullable = false)
     private double amount;
+
+    @Column(name = "interest", nullable = false)
+    private double interest;
 
 }

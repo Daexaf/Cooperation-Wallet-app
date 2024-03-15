@@ -2,10 +2,8 @@ package com.enigma.koperasinew.service.impl;
 
 import com.enigma.koperasinew.dto.request.AdminRequest;
 import com.enigma.koperasinew.dto.response.AdminResponse;
-import com.enigma.koperasinew.dto.response.CustomerResponse;
 import com.enigma.koperasinew.entity.Admin;
 import com.enigma.koperasinew.entity.Customer;
-import com.enigma.koperasinew.repository.AdminRepository;
 import com.enigma.koperasinew.service.AdminService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -49,8 +47,27 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public AdminResponse createAdmins(Admin request) {
-        return null;
+    public AdminResponse createAdmins(Admin adminRequest) {
+        String newAdminId = UUID.randomUUID().toString();
+
+        entityManager.createNativeQuery(
+                        "INSERT INTO m_admin (id, full_name, mobile_phone, email,user_credential_id) " +
+                                "VALUES (?, ?, ?, ?,?)")
+                .setParameter(1, newAdminId)
+                .setParameter(2, adminRequest.getName())
+                .setParameter(3, adminRequest.getMobilePhone())
+                .setParameter(4, adminRequest.getEmail())
+                .setParameter(5,adminRequest.getUserCredential().getId())
+                .executeUpdate();
+
+        Admin newAdmin = entityManager.find(Admin.class, newAdminId);
+
+        return AdminResponse.builder()
+                .id(newAdmin.getId())
+                .name(newAdmin.getName())
+                .mobilePhone(newAdmin.getMobilePhone())
+                .email(newAdmin.getEmail())
+                .build();
     }
 
     @Override

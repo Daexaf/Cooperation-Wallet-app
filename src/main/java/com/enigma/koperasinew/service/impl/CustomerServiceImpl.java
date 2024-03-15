@@ -133,4 +133,32 @@ public class CustomerServiceImpl implements CustomerService {
             return null;
         }
     }
+
+    @Override
+    public CustomerResponse createNewCustomer(Customer customerRequest) {
+        String newCustomerId = UUID.randomUUID().toString();
+
+        entityManager.createNativeQuery(
+                        "INSERT INTO m_customer (id, full_name, mobile_phone, email, address, customer_identity,user_credential_id) " +
+                                "VALUES (?, ?, ?, ?, ?, ?,?)")
+                .setParameter(1, newCustomerId)
+                .setParameter(2, customerRequest.getName())
+                .setParameter(3, customerRequest.getMobilePhone())
+                .setParameter(4, customerRequest.getEmail())
+                .setParameter(5, customerRequest.getAddress())
+                .setParameter(6, customerRequest.getCustomerIdentity())
+                .setParameter(7,customerRequest.getUserCredential().getId())
+                .executeUpdate();
+
+        Customer newCustomer = entityManager.find(Customer.class, newCustomerId);
+
+        return CustomerResponse.builder()
+                .id(newCustomer.getId())
+                .name(newCustomer.getName())
+                .mobilePhone(newCustomer.getMobilePhone())
+                .email(newCustomer.getEmail())
+                .address(newCustomer.getAddress())
+                .customerIdentity(newCustomer.getCustomerIdentity())
+                .build();
+    }
 }

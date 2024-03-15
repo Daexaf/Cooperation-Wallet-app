@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 public class CustomerRequest {
     private String id;
+    private String username;
+    private String password;
     private String name;
     private String email;
     private String mobilePhone;

@@ -26,7 +26,7 @@ public class SecurityConfiguration {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    private static final String[] WHITE_LIST_URL = {"/api/auth/**", "/**"};
+    private static final String[] WHITE_LIST_URL = { "/**"};
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http

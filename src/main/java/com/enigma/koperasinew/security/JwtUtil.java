@@ -18,11 +18,11 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
-    @Value("${app.KoperasiNew.jwt.jwt-secret}")
+    @Value("${app.koperasinew.jwt.jwt-secret}")
     private String jwtSecret;
-    @Value("${app.shopeymart.jwt.app-name}")
+    @Value("${app.koperasinew.jwt.app-name}")
     private String appName;
-    @Value("${app.shopeymart.jwt.jwtExpirationInSecond}")
+    @Value("${app.koperasinew.jwt.jwtExpirationInSecond}")
     private Long jwtExpirationInSecond;
 
     public String generateToken(AppUser appUser){

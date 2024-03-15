@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 public class SavingRequest {
     private String id;
+    private String name;
     private String customer;
     private String type;
     private LocalDateTime date;

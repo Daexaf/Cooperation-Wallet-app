@@ -9,11 +9,13 @@ public interface SavingService {
 
     List<SavingResponse> getAllSavings();
 
-//    SavingResponse updateSaving(SavingRequest savingRequest);
-
     SavingResponse createSaving(SavingRequest savingRequest);
 
     void delete(String id);
 
     SavingResponse getSavingById(String id);
+
+    SavingResponse addAmount(String id, double addAmount);
+
+    SavingResponse withdraw(String id, double withdrawAmount);
 }

@@ -14,8 +14,10 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 public class SavingResponse {
     private String id;
+    private String name;
     private String customer;
     private EType eType;
     private LocalDateTime date;
     private Double amount;
+    private Double interest;
 }
