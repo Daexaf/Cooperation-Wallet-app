@@ -3,7 +3,6 @@ package com.enigma.koperasinew.service.impl;
 import com.enigma.koperasinew.dto.request.AdminRequest;
 import com.enigma.koperasinew.dto.response.AdminResponse;
 import com.enigma.koperasinew.entity.Admin;
-import com.enigma.koperasinew.entity.Customer;
 import com.enigma.koperasinew.service.AdminService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 public class AdminServiceImpl implements AdminService {
     @PersistenceContext
     private EntityManager entityManager;
-
     @Override
     public AdminResponse createAdmin(AdminRequest adminRequest) {
         String newAdminId = UUID.randomUUID().toString();
@@ -35,9 +33,7 @@ public class AdminServiceImpl implements AdminService {
                 .setParameter(3, adminRequest.getMobilePhone())
                 .setParameter(4, adminRequest.getEmail())
                 .executeUpdate();
-
         Admin newAdmin = entityManager.find(Admin.class, newAdminId);
-
         return AdminResponse.builder()
                 .id(newAdmin.getId())
                 .name(newAdmin.getName())
@@ -59,9 +55,7 @@ public class AdminServiceImpl implements AdminService {
                 .setParameter(4, adminRequest.getEmail())
                 .setParameter(5,adminRequest.getUserCredential().getId())
                 .executeUpdate();
-
         Admin newAdmin = entityManager.find(Admin.class, newAdminId);
-
         return AdminResponse.builder()
                 .id(newAdmin.getId())
                 .name(newAdmin.getName())
@@ -75,11 +69,9 @@ public class AdminServiceImpl implements AdminService {
         Query findAdminQuery = entityManager.createNativeQuery(
                         "SELECT * FROM m_admin WHERE id = ?", Admin.class)
                 .setParameter(1, adminRequest.getId());
-
         List<Admin> resultList = findAdminQuery.getResultList();
         if (!resultList.isEmpty()) {
             Admin existingAdmin = resultList.get(0);
-
             Query updateQuery = entityManager.createNativeQuery(
                             "UPDATE m_admin SET full_name = ?, mobile_phone = ?, email = ? WHERE id = ?")
                     .setParameter(1, adminRequest.getName())
@@ -87,7 +79,6 @@ public class AdminServiceImpl implements AdminService {
                     .setParameter(3, adminRequest.getEmail())
                     .setParameter(4, adminRequest.getId());
             updateQuery.executeUpdate();
-
             return AdminResponse.builder()
                     .id(adminRequest.getId())
                     .name(adminRequest.getName())
@@ -106,7 +97,6 @@ public class AdminServiceImpl implements AdminService {
                         "DELETE FROM m_admin WHERE id = ?")
                 .setParameter(1, id)
                 .executeUpdate();
-
         if (deletedRows > 0) {
             System.out.println("delete succeed");
         } else {
@@ -119,7 +109,6 @@ public class AdminServiceImpl implements AdminService {
         List<Object[]> resultList = entityManager.createNativeQuery(
                         "SELECT id, full_name, mobile_phone, email, FROM am_admin")
                 .getResultList();
-
         return resultList.stream()
                 .map(row -> AdminResponse.builder()
                         .id((String) row[0])
@@ -136,7 +125,6 @@ public class AdminServiceImpl implements AdminService {
                         "SELECT id, full_name, mobile_phone, email FROM m_admin WHERE id = ?")
                 .setParameter(1, id)
                 .getSingleResult();
-
         if (result != null) {
             return AdminResponse.builder()
                     .id((String) result[0])

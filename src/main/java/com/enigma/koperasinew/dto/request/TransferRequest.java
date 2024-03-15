@@ -11,11 +11,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class SavingRequest {
+public class TransferRequest {
     private String id;
-    private String name;
-    private String customer;
-    private String type;
+    private String senderId;
+    private String recipientId;
+    private String note;
+    private double amount;
     private LocalDateTime date;
-    private Double amount;
+
 }

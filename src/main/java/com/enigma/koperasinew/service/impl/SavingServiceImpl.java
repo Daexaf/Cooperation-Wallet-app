@@ -7,6 +7,7 @@ import com.enigma.koperasinew.entity.Saving;
 import com.enigma.koperasinew.service.SavingService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,6 @@ public class SavingServiceImpl implements SavingService {
         List<Object[]> resultList = entityManager.createNativeQuery(
                         "SELECT id, name, customer_id, e_type, date, amount, interest FROM m_saving")
                 .getResultList();
-
         return resultList.stream()
                 .map(row -> {
                     String id = (String) row[0];
@@ -40,7 +40,6 @@ public class SavingServiceImpl implements SavingService {
                     LocalDateTime date = ((Timestamp) row[4]).toLocalDateTime();
                     Double amount = (Double) row[5];
                     Double interest = (Double) row[6];
-
                     return SavingResponse.builder()
                             .id(id)
                             .name(name)
@@ -59,8 +58,6 @@ public class SavingServiceImpl implements SavingService {
         String newSavingId = UUID.randomUUID().toString();
         double amount = savingRequest.getAmount();
         EType eType = EType.valueOf(savingRequest.getType());
-
-
         if (eType == EType.SILVER && amount < 50000) {
             throw new IllegalArgumentException("Minimum amount for Silver is 50000");
         } else if (eType == EType.GOLD && amount < 100000) {
@@ -83,9 +80,7 @@ public class SavingServiceImpl implements SavingService {
                 .setParameter(6, savingRequest.getAmount())
                 .setParameter(7, interest)
                 .executeUpdate();
-
         Saving newSaving = entityManager.find(Saving.class, newSavingId);
-
         return convertToResponse(newSaving);
     }
 
@@ -95,7 +90,6 @@ public class SavingServiceImpl implements SavingService {
                         "DELETE FROM m_saving WHERE id = ?")
                 .setParameter(1, id)
                 .executeUpdate();
-
         if (deletedRows > 0) {
             System.out.println("Delete successful");
         } else {
@@ -109,7 +103,6 @@ public class SavingServiceImpl implements SavingService {
                         "SELECT id, name ,customer_id, e_type, date, amount, interest FROM m_saving WHERE id = ?")
                 .setParameter(1, id)
                 .getSingleResult();
-
         if (result != null) {
             String savingId = (String) result[0];
             String name = (String) result[1];
@@ -118,7 +111,6 @@ public class SavingServiceImpl implements SavingService {
             LocalDateTime date = ((Timestamp) result[4]).toLocalDateTime();
             Double amount = (Double) result[5];
             Double interest = (Double) result[6];
-
             return SavingResponse.builder()
                     .id(savingId)
                     .name(name)
@@ -149,17 +141,24 @@ public class SavingServiceImpl implements SavingService {
 
     @Override
     public SavingResponse deposit(String id, double addAmount) {
-        Saving existingSaving = entityManager.find(Saving.class, id);
-        if (existingSaving == null) {
+        Query findSavingQuery = entityManager.createNativeQuery(
+                        "SELECT * FROM m_saving WHERE id = ?", Saving.class)
+                .setParameter(1, id);
+        List<Saving> resultList = findSavingQuery.getResultList();
+        if (!resultList.isEmpty()) {
+            Saving existingSaving = resultList.get(0);
+            double currentAmount = existingSaving.getAmount();
+            double newAmount = currentAmount + addAmount;
+            existingSaving.setAmount(newAmount);
+            Query updateQuery = entityManager.createNativeQuery(
+                    "UPDATE m_saving SET amount = ? WHERE id = ?");
+            updateQuery.setParameter(1, newAmount);
+            updateQuery.setParameter(2, id);
+            updateQuery.executeUpdate();
+            return convertToResponse(existingSaving);
+        } else {
             throw new IllegalArgumentException("Saving with ID " + id + " not found");
         }
-        double currentAmount = existingSaving.getAmount();
-        double newAmount = currentAmount + addAmount;
-        existingSaving.setAmount(newAmount);
-
-        entityManager.merge(existingSaving);
-
-        return convertToResponse(existingSaving);
     }
 
     @Override
@@ -183,16 +182,21 @@ public class SavingServiceImpl implements SavingService {
             default:
                 throw new IllegalArgumentException("Invalid EType");
         }
-
         double currentAmount = existingSaving.getAmount();
         if (currentAmount - withdrawAmount < minimumBalance) {
             throw new IllegalArgumentException("Insufficient balance for withdrawal");
         }
         double newAmount = currentAmount - withdrawAmount;
         existingSaving.setAmount(newAmount);
-        entityManager.merge(existingSaving);
+        Query updateQuery = entityManager.createNativeQuery(
+                "UPDATE m_saving SET amount = ? WHERE id = ?");
+        updateQuery.setParameter(1, newAmount);
+        updateQuery.setParameter(2, id);
+        updateQuery.executeUpdate();
+
         return convertToResponse(existingSaving);
     }
+
 
     @Override
     public SavingResponse getSavingByIdCust(String customerId) {
@@ -209,7 +213,6 @@ public class SavingServiceImpl implements SavingService {
             LocalDateTime date = ((Timestamp) row[3]).toLocalDateTime();
             Double amount = (Double) row[4];
             Double interest = (Double) row[5];
-
             return SavingResponse.builder()
                     .id(id)
                     .customer(customer)
